@@ -1,17 +1,50 @@
-use std::cell::Cell;
-use std::rc::Rc;
+use std::fs;
+use std::path::Path;
+use std::time::{SystemTime, UNIX_EPOCH};
 use crate::glib::clone;
+use gtk4::gio::SrvTarget;
 use gtk4::Orientation;
 use gtk4::{prelude::*, Button};
 use gtk4::{glib, Application, ApplicationWindow};
+extern crate screenshot;
+use screenshot::get_screenshot;
+
 
 const APP_ID: &str = "dc.gtk_rs.ScreenShooter";
 
 fn main() -> glib::ExitCode {
     let app = Application::builder().application_id(APP_ID).build();
 
-    app.connect_activate(build_ui);
+    app.connect_activate(build_base_ui);
     app.run()
+}
+
+fn take_and_save_screenshot() -> Result<String, Box<dyn std::error::Error>> {
+    let screenshots_folder = "C:\\Users\\games";
+    fs::create_dir_all(screenshots_folder);
+
+    let screen = get_screenshot(0)?;
+
+    let path = Path::new(&filename);
+
+    let width = screenshot.width() as u32;
+    let height = screenshot.height() as u32;
+    let image: RgbaImage = ImageBuffer::from_raw(width, height, screenshot.into_vec())
+        .ok_or("Failed to create image buffer")?;
+
+        let filename = format!(
+            "{}/screenshot_{}.png",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)?
+                .as_secs()
+        );
+
+    let path = Path::new(&filename);
+
+    // Сохраняем изображение как PNG
+    image.save(path)?;
+    Ok(filename)
+
 }
 
 fn build_base_ui(app: &Application) {
