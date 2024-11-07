@@ -1,7 +1,7 @@
 use std::cell::Cell;
 use std::rc::Rc;
 use crate::glib::clone;
-
+use gtk4::Orientation;
 use gtk4::{prelude::*, Button};
 use gtk4::{glib, Application, ApplicationWindow};
 
@@ -16,43 +16,53 @@ fn main() -> glib::ExitCode {
 
 fn build_ui(app: &Application) {
 
-    let button = Button::builder()
-        .label("-")
+    let button_increase = Button::builder()
+        .label("Increase")
+        .margin_top(12)
+        .margin_bottom(12)
+        .margin_start(12)
+        .margin_end(12)
         .build();
-    let button2 = Button::builder()
-        .label("+")
-        .margin_bottom(50)
-        .margin_end(50)
-        .margin_start(50)
-        .margin_top(50)
+    let button_decrease = Button::builder()
+        .label("Decrease")
+        .margin_top(12)
+        .margin_bottom(12)
+        .margin_start(12)
+        .margin_end(12)
         .build();
 
     let number = Rc::new(Cell::new(0));
-    let number_copy = number.clone();
 
-    button.connect_clicked(clone!(
+    button_increase.connect_clicked(clone!(
         #[weak]
         number,
-        #[strong]
-        button,
+        #[weak]
+        button_decrease,
         move |_| {
             number.set(number.get() + 1);
-            button.set_label(&number.get().to_string());
+            button_decrease.set_label(&number.get().to_string());
         }
     ));
-    button2.connect_clicked(clone!(
-        #[strong]
-        button2,
+    button_decrease.connect_clicked(clone!(
+        #[weak]
+        button_increase,
         move |_| {
             number.set(number.get() - 1);
-            button2.set_label(&number.get().to_string());
+            button_increase.set_label(&number.get().to_string());
         }
     ));
+
+    let gtk_box = gtk4::Box::builder()
+        .orientation(Orientation::Vertical)
+        .build();
+    gtk_box.append(&button_increase);
+    gtk_box.append(&button_decrease);
 
     let window = ApplicationWindow::builder()
         .application(app)
         .title("My Screenshot APP")
-        .child(&button)
+        .child(&gtk_box)
+
         .build();
     window.present();
 }
