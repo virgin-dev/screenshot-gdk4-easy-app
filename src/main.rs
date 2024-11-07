@@ -14,6 +14,35 @@ fn main() -> glib::ExitCode {
     app.run()
 }
 
+fn build_base_ui(app: &Application) {
+    let button = Button::with_label("Take Screenshot");
+
+    button.connect_clicked(clone!(
+        #[weak]
+        button,
+        move |_| {
+            match take_and_save_screenshot() {
+                Ok(path) => println!("Screenshoot saved to : {:?}", path),
+                Err(e) => eprintln!("Failed to take screenshot: {:?}", e),
+            }
+        }
+    ));
+
+    let gtk_box = gtk4::Box::builder()
+    .orientation(Orientation::Vertical)
+    .build();
+    gtk_box.append(&button);
+
+    let window =  ApplicationWindow::builder()
+    .application(app)
+    .default_width(100)
+    .default_height(200)
+    .title("My Screenshot APP")
+    .child(&gtk_box)
+    .build();
+
+}
+
 fn build_ui(app: &Application) {
 
     let button_increase = Button::builder()
